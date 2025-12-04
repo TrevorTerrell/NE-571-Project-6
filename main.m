@@ -4,15 +4,23 @@ clc
 %% Constants
 POWER = 160e6 / 3.2e-11; % num fissions
 CORE_WIDTH = 4.6; % m
-LAYOUT_BASE = [  2, 2, 1, 1, 1, 2, 2;
-            2, 1, 1, 1, 1, 1, 2;
-            1, 1, 1, 1, 1, 1, 1;
-            1, 1, 1, 1, 1, 1, 1;
-            1, 1, 1, 1, 1, 1, 1;
-            2, 1, 1, 1, 1, 1, 2;
-            2, 2, 1, 1, 1, 2, 2;];
+LAYOUT_BASE = [
+    2, 2, 1, 1, 1, 2, 2;
+    2, 1, 1, 1, 1, 1, 2;
+    1, 1, 1, 1, 1, 1, 1;
+    1, 1, 1, 1, 1, 1, 1;
+    1, 1, 1, 1, 1, 1, 1;
+    2, 1, 1, 1, 1, 1, 2;
+    2, 2, 1, 1, 1, 2, 2;
+];
 
-LAYOUT = ScaleLayout(LAYOUT_BASE, 9);
+LAYOUT = ScaleLayout(LAYOUT_BASE, 1);
+
+% fuel pellet OD = 0.8155 cm
+% active height = 2 m
+% 264 fuel rods per assemble
+
+ASS_U_MASS = (pi * (0.8155 / 100)^2 * 2) * 265 * 10.97; %MTU
 
 % material 0 is a mixture of steel and air
 % material 1 is a placeholder for the fuel. The layout should be multiplied by the index of the desired fuel state
@@ -39,31 +47,45 @@ node_width = CORE_WIDTH / (num_nodes_x + 1) * 100; %cm
 
 %% Plotting Flux
 
-groups = 2;
+% groups = 2;
 
 x_vals = linspace(0, CORE_WIDTH * sqrt(2), num_nodes_x + 2);
-nodes_per_group = num_nodes_x * num_nodes_y;
+% nodes_per_group = num_nodes_x * num_nodes_y;
 
-groupData(groups).flux = zeros(num_nodes_x, num_nodes_y);
-groupData(groups).fiss_factor = 0;
-unorm_power = 0;
+% groupData(groups).flux = zeros(num_nodes_x, num_nodes_y);
+% groupData(groups).fiss_factor = 0;
+% unorm_power = 0;
 
-figure(1);
+% figure(1);
 
-for g = 1:groups
-    st = 1 + (nodes_per_group * (g - 1));
-    sp = nodes_per_group * g;
-    g_flux = flux(st:sp);
-    g_spacial_flux = SpatialFlux(g_flux, num_nodes_x + 2, num_nodes_y + 2);
+% for g = 1:groups
+%     st = 1 + (nodes_per_group * (g - 1));
+%     sp = nodes_per_group * g;
+%     g_flux = flux(st:sp);
+%     g_spacial_flux = SpatialFlux(g_flux, num_nodes_x + 2, num_nodes_y + 2);
 
-    groupData(g).flux = g_spacial_flux .* node_width .* node_width;
-    groupData(g).fiss_factor = GetFissNormFactor(groupData(g).flux, LAYOUT, materials, g);
-    unorm_power = unorm_power + groupData(g).fiss_factor;
-end
+%     groupData(g).flux = g_spacial_flux .* node_width .* node_width;
+%     groupData(g).fiss_factor = GetFissNormFactor(groupData(g).flux, LAYOUT, materials, g);
+%     unorm_power = unorm_power + groupData(g).fiss_factor;
+% end
 
-for g = 1:groups
-    groupData(g).flux = groupData(g).flux .* POWER ./ unorm_power ./ node_width ./ node_width;
-    center_line = diag(groupData(g).flux);
+% for g = 1:groups
+%     groupData(g).flux = groupData(g).flux .* POWER ./ unorm_power ./ node_width ./ node_width;
+%     center_line = diag(groupData(g).flux);
+%     plot(x_vals, center_line, 'DisplayName', sprintf('Group %i', g - 1), 'LineWidth', 3);
+%     hold("on");
+% end
+
+[n_flux, power] = NormalizeFluxAndPower(flux, LAYOUT, materials, POWER, 2, num_nodes_x * num_nodes_y, node_width);
+
+disp(power)
+disp(sum(sum(power)))
+burnup = PowerToBurnup(power, ASS_U_MASS);
+disp(burnup)
+disp(sum(sum(burnup)))
+
+for g = 1:2
+    center_line = diag(n_flux(g).f);
     plot(x_vals, center_line, 'DisplayName', sprintf('Group %i', g - 1), 'LineWidth', 3);
     hold("on");
 end
