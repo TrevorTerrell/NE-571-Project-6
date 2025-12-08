@@ -2,7 +2,7 @@ clear
 clc
 
 %% Constants
-POWER = 160e6 / 3.2e-11; % num fissions
+POWER = 250e6 / 3.2e-11; % num fissions
 CORE_WIDTH = 4.6; % m
 LAYOUT_BASE = [
     2, 2, 1, 1, 1, 2, 2;
