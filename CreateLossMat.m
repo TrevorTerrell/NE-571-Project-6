@@ -8,9 +8,6 @@ function A = CreateLossMat(layout, materials, dx, dy, g)
 %   dx: width of 1 node in the x direction
 %   dy: width of 1 node in the y direction
 %   g: number of energy groups
-
-    %Shrink layout b/c 0 boundary condition
-    layout = layout(2:(end - 1), 2:(end - 1));
     [Nx, Ny] = size(layout);
 
     A_only_c = zeros(Nx * Ny, 1);

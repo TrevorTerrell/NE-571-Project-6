@@ -6,8 +6,8 @@ function S = CreateSctrMat(layout, materials, g)
 %       sct: downscattering cross section
 %   g: number of energy groups
 
-    % Shrink layout b/c 0 boundary condition
-    layout = reshape(layout(2:(end - 1), 2:(end - 1)), 1, []);
+    % % Shrink layout b/c 0 boundary condition
+    layout = reshape(layout, 1, []);
     N = size(layout, 2);
 
     Sc = arrayfun(@(id) materials(id).sct(g), layout);

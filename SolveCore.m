@@ -12,13 +12,15 @@ function [crit, flux] = SolveCore(layout, mats, dx, dy)
 %   dy: width of 1 node in the y direction
 
     groups = size(mats(1).fiss, 1);
+    [NX, NY] = size(layout);
+    SPAN = NX * NY;
 
-    M =  zeros(groups * span);
-    F =  zeros(groups * span);
-    Sc = zeros(groups * span);
+    M =  zeros(groups * SPAN);
+    F =  zeros(groups * SPAN);
+    Sc = zeros(groups * SPAN);
 
     for g = 1:groups
-        mat_area = (1 + span * (g - 1)):(span * g);
+        mat_area = (1 + SPAN * (g - 1)):(SPAN * g);
         A_g = CreateLossMat(layout, mats, dx, dy, g);
         F_g = CreateFissMat(layout, mats, g);
         M(mat_area, mat_area) = A_g;
