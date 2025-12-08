@@ -14,7 +14,8 @@ LAYOUT_BASE = [
     2, 2, 1, 1, 1, 2, 2;
 ];
 
-LAYOUT = ScaleLayout(LAYOUT_BASE, 1);
+SCALE_FACTOR = 9;
+LAYOUT = ScaleLayout(LAYOUT_BASE, SCALE_FACTOR);
 
 % fuel pellet OD = 0.8155 cm
 % active height = 2 m
@@ -79,6 +80,7 @@ x_vals = linspace(0, CORE_WIDTH * sqrt(2), num_nodes_x + 2);
 [n_flux, power] = NormalizeFluxAndPower(flux, LAYOUT, materials, POWER, 2, num_nodes_x * num_nodes_y, node_width);
 
 disp(power)
+power = ScaleLayout(power, 1/SCALE_FACTOR) * SCALE_FACTOR^2;
 disp(sum(sum(power)))
 burnup = PowerToBurnup(power, ASS_U_MASS);
 disp(burnup)
