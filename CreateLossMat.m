@@ -10,32 +10,25 @@ function A = CreateLossMat(layout, materials, dx, dy, g)
 %   g: number of energy groups
     [Nx, Ny] = size(layout);
 
-    A_only_c = zeros(Nx * Ny, 1);
-    A_only_e = zeros(Nx * Ny - 1, 1);
-    A_only_w = zeros(Nx * Ny - 1, 1);
-    A_only_n = zeros(Nx * (Ny - 1), 1);
-    A_only_s = zeros(Nx * (Ny - 1), 1);
+    diff_map    = arrayfun(@(id) materials(id).diff(g), layout);
+    rm_map      = arrayfun(@(id) materials(id).rm(g),   layout);
 
-    for i = 1:Nx
-        for j = 1:Ny
-            A_only_c((i - 1) * Ny + j) = 2 * materials(layout(i,j)).diff(g) * (dx ^ 2 + dy ^ 2) / (dx ^ 2 * dy ^ 2) + materials(layout(i,j)).rm(g);
-        end
-    end
+    A_only_c = 2 * diff_map * (dx^2 + dy^2) / (dx^2 * dy^2) + rm_map;
+    A_only_e = - diff_map / dx^2;
+    A_only_w = A_only_e;
+    A_only_w(1, :) = 0;
+    A_only_e(end, :) = 0;
+    A_only_s = - diff_map / dy^2;
+    A_only_n = A_only_s;
+    A_only_n(:, 1) = 0;
+    A_only_s(:, end) = 0;
 
-    for i = 1:Nx
-        for j = 1:(Ny - 1)
-            A_only_e((i - 1) * Ny + j) = - materials(layout(i, j + 1)).diff(g) / (dx ^ 2);
-            A_only_w((i - 1) * Ny + j) = - materials(layout(i, j    )).diff(g) / (dx ^ 2);
-        end
-    end
+    A_only_c = A_only_c(:);
+    A_only_e = A_only_e(:);
+    A_only_w = A_only_w(:);
+    A_only_n = A_only_n(:);
+    A_only_s = A_only_s(:);
 
-    for j = 1:Ny
-        for i = 1:(Nx - 1)
-            A_only_n((i - 1) * Ny + j) = - materials(layout(i,     j)).diff(g) / (dy ^ 2);
-            A_only_s((i - 1) * Ny + j) = - materials(layout(i + 1, j)).diff(g) / (dy ^ 2);
-        end
-    end
-
-    A = diag(A_only_c) + diag(A_only_e, 1) + diag(A_only_w, -1) + diag(A_only_n, Nx) + diag(A_only_s, - Nx);
+    A = diag(A_only_c) + diag(A_only_e(1:end-1), 1) + diag(A_only_w(2:end), -1) + diag(A_only_n(1+Nx:end), Nx) + diag(A_only_s(1:end-Nx), - Nx);
 
 end
