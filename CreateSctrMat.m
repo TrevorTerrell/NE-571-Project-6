@@ -12,5 +12,5 @@ function S = CreateSctrMat(layout, materials, g)
 
     Sc = arrayfun(@(id) materials(id).sct(g), layout);
 
-    S = spdiags(Sc, 0, N, N);
+    S = spdiags(Sc', 0, N, N);
 end
